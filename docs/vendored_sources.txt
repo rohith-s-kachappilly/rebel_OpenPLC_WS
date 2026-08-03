@@ -1,0 +1,26 @@
+=== src/ira_laser_tools/
+https://github.com/nakai-omer/ira_laser_tools.git
+humble
+29857278b99108b3ba637892b03dbdb7acb12aa6
+=== src/iRC_ROS/
+https://github.com/CommonplaceRobotics/iRC_ROS.git
+humble
+41701e6df3398087d217f0f478622e60f694de41
+M  irc_ros_bringup/config/controller_igus_rebel_4dof.yaml
+M  irc_ros_bringup/launch/rebel.launch.py
+M  irc_ros_hardware/src/CRI/cri_socket.cpp
+M  irc_ros_hardware/src/irc_ros_cri.cpp
+=== src/joint_state_publisher/
+https://github.com/ros/joint_state_publisher.git
+ros2
+68986c7b1a2ced650213d24a3a6487a472fcd8d1
+?? joint_state_publisher/joint_state_publisher/__pycache__/
+?? joint_state_publisher_gui/joint_state_publisher_gui/__pycache__/
+=== src/rqt_robot_steering/
+https://github.com/cpr-fer/rqt_robot_steering.git
+twiststamped
+6db1fc4a3e3265d3213b5fca76f2010dc1aeae77
+=== src/sicks300_2/
+https://github.com/ajtudela/sicks300_2.git
+humble
+ccd0d607a1e3d28981340618cdeb0fdd6084eedc

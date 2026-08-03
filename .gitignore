@@ -1,0 +1,17 @@
+build/
+install/
+log/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.vscode/
+*.bag
+*.db3
+*.mcap
+rosbag2_*/
+*~
+*.orig
+*.rej
+*~
+*.orig
+*.rej

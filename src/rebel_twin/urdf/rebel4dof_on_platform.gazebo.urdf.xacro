@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="rebel4dof_twin">
+
+  <xacro:arg name="continuous_last_joint" default="false"/>
+
+  <!-- Reuse the repo's own arm description (links, meshes, inertials) -->
+  <xacro:include filename="$(find irc_ros_description)/urdf/robots/igus_rebel_4dof_01.description.xacro"/>
+
+  <!-- 4-DOF arm; prefix kept so the sim controller's joint names stay valid -->
+  <xacro:igus_rebel_4dof_00_description prefix="rebel_1_"
+      continuous_last_joint="$(arg continuous_last_joint)"/>
+
+  <!-- Anchor the arm base to the world so Gazebo doesn't drop it -->
+  <link name="world"/>
+  <joint name="world_to_rebel" type="fixed">
+    <parent link="world"/>
+    <child  link="rebel_1_base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <gazebo reference="rebel_1_base_link"><gravity>0</gravity><material>Gazebo/DarkGrey</material></gazebo>
+  <gazebo reference="rebel_1_link_1"><gravity>0</gravity><material>Gazebo/DarkGrey</material></gazebo>
+  <gazebo reference="rebel_1_link_2"><gravity>0</gravity><material>Gazebo/FlatBlack</material></gazebo>
+  <gazebo reference="rebel_1_link_3"><gravity>0</gravity><material>Gazebo/DarkGrey</material></gazebo>
+  <gazebo reference="rebel_1_link_4"><gravity>0</gravity><material>Gazebo/DarkBlue</material></gazebo>
+  <gazebo reference="rebel_1_flange"><gravity>0</gravity><material>Gazebo/DarkGrey</material></gazebo>
+  <!-- Minimal ros2_control for the 4 arm joints, Gazebo backend -->
+  <ros2_control name="rebel4dof_sim" type="system">
+    <hardware>
+      <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+    </hardware>
+    <joint name="rebel_1_joint1">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="rebel_1_joint2">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="rebel_1_joint3">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="rebel_1_joint4">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+
+  <!-- Start a controller_manager INSIDE Gazebo, under /sim -->
+  <gazebo>
+    <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+      <ros><namespace>/sim</namespace></ros>
+      <robot_param>robot_description</robot_param>
+      <robot_param_node>robot_state_publisher</robot_param_node>
+      <parameters>$(find rebel_twin)/config/sim_controllers.yaml</parameters>
+    </plugin>
+  </gazebo>
+
+</robot>

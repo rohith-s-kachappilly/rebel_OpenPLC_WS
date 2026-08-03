@@ -1,0 +1,130 @@
+diff --git a/irc_ros_bringup/config/controller_igus_rebel_4dof.yaml b/irc_ros_bringup/config/controller_igus_rebel_4dof.yaml
+index 64e9177..8a9cc77 100644
+--- a/irc_ros_bringup/config/controller_igus_rebel_4dof.yaml
++++ b/irc_ros_bringup/config/controller_igus_rebel_4dof.yaml
+@@ -1,6 +1,6 @@
+ <namespace>/controller_manager:
+   ros__parameters:
+-    update_rate: 100 # 100Hz for CAN and 10Hz for CRI
++    update_rate: 10 # 100Hz for CAN and 10Hz for CRI
+ 
+     joint_state_broadcaster:
+       type: joint_state_broadcaster/JointStateBroadcaster
+@@ -8,6 +8,9 @@
+     joint_trajectory_controller:
+       type: joint_trajectory_controller/JointTrajectoryController
+ 
++    position_controller:
++      type: position_controllers/JointGroupPositionController
++
+     dio_controller:
+       type: irc_ros_controllers/DIOController
+ 
+@@ -31,6 +34,14 @@
+     open_loop_control: true
+     allow_partial_joints_goal: true
+ 
++<namespace>/position_controller:
++  ros__parameters:
++    joints:
++      - <prefix>joint1
++      - <prefix>joint2
++      - <prefix>joint3
++      - <prefix>joint4
++
+ <namespace>/dio_controller:
+   ros__parameters:
+     digital_inputs: 
+@@ -53,4 +64,4 @@
+       - <prefix>dio_base/digital_output_3
+       - <prefix>dio_base/digital_output_4
+       - <prefix>dio_base/digital_output_5
+-      - <prefix>dio_base/digital_output_6
+\ No newline at end of file
++      - <prefix>dio_base/digital_output_6
+diff --git a/irc_ros_bringup/launch/rebel.launch.py b/irc_ros_bringup/launch/rebel.launch.py
+index 1b347b2..1a58d91 100644
+--- a/irc_ros_bringup/launch/rebel.launch.py
++++ b/irc_ros_bringup/launch/rebel.launch.py
+@@ -175,20 +175,20 @@ def generate_launch_description():
+         namespace=namespace,
+         parameters=[{"robot_description": robot_description}],
+     )
+-    joint_state_pub = Node(
+-        package="joint_state_publisher",
+-        executable="joint_state_publisher",
+-        name="joint_state_publisher",
+-        namespace=namespace,
+-        parameters=[
+-            {
+-                "source_list": [
+-                    "/joint_states",
+-                ],
+-                "rate": 30,
+-            }
+-        ],
+-    )
++#    joint_state_pub = Node(
++#        package="joint_state_publisher",
++#        executable="joint_state_publisher",
++#        name="joint_state_publisher",
++#        namespace=namespace,
++#        parameters=[
++#            {
++#                "source_list": [
++#                    "/joint_states",
++#                ],
++#                "rate": 30,
++#            }
++#        ],
++#    )
+     control_node = Node(
+         package="controller_manager",
+         executable="ros2_control_node",
+@@ -254,7 +254,7 @@ def generate_launch_description():
+ 
+     # Robot nodes
+     description.add_action(robot_state_pub)
+-    description.add_action(joint_state_pub)
++#    description.add_action(joint_state_pub)
+ 
+     # ROS2 Control nodes
+     description.add_action(control_node)
+diff --git a/irc_ros_hardware/src/CRI/cri_socket.cpp b/irc_ros_hardware/src/CRI/cri_socket.cpp
+index 8759b55..d6b5b51 100644
+--- a/irc_ros_hardware/src/CRI/cri_socket.cpp
++++ b/irc_ros_hardware/src/CRI/cri_socket.cpp
+@@ -92,9 +92,10 @@ void CriSocket::SeparateMessages(const char * msg)
+       RCLCPP_ERROR(
+         rclcpp::get_logger("iRC_ROS::CRI"),
+         "There was a partial robot message, but could not find the end of it in the next message.");
++      end = msg;
+     } else {
+       // TODO: Test if the following line has been broken by C array to std::array
+-      std::string result1(fragmentBuffer.front(), fragmentLength);
++      std::string result1(fragmentBuffer.data(), fragmentLength);
+       std::string result2(msg, end - msg);
+ 
+       {
+@@ -157,7 +158,7 @@ void CriSocket::ReceiveThreadFunction()
+     }
+ 
+     std::fill_n(buffer, bufferSize, '\0');
+-    int valread = read(sock, buffer, bufferSize);
++    int valread = read(sock, buffer, bufferSize - 1);
+ 
+     if (!IsSocketOk()) {
+       connectionNeeded = true;
+diff --git a/irc_ros_hardware/src/irc_ros_cri.cpp b/irc_ros_hardware/src/irc_ros_cri.cpp
+index d2ee208..751956c 100644
+--- a/irc_ros_hardware/src/irc_ros_cri.cpp
++++ b/irc_ros_hardware/src/irc_ros_cri.cpp
+@@ -466,7 +466,7 @@ hardware_interface::return_type IrcRosCri::read(const rclcpp::Time &, const rclc
+ 
+   // degrees to radians and apply offset
+   for (size_t i = 0; i < pos_.size(); i++) {
+-    temp_pos[i] = temp_pos[i] + pos_offset_[i];
++    temp_pos[i] = temp_pos[i] - pos_offset_[i];
+     pos_[i] = temp_pos[i] * M_PI / 180.0;
+   }
+ 
