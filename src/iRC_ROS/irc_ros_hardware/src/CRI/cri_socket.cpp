@@ -92,9 +92,10 @@ void CriSocket::SeparateMessages(const char * msg)
       RCLCPP_ERROR(
         rclcpp::get_logger("iRC_ROS::CRI"),
         "There was a partial robot message, but could not find the end of it in the next message.");
+      end = msg;
     } else {
       // TODO: Test if the following line has been broken by C array to std::array
-      std::string result1(fragmentBuffer.front(), fragmentLength);
+      std::string result1(fragmentBuffer.data(), fragmentLength);
       std::string result2(msg, end - msg);
 
       {
@@ -157,7 +158,7 @@ void CriSocket::ReceiveThreadFunction()
     }
 
     std::fill_n(buffer, bufferSize, '\0');
-    int valread = read(sock, buffer, bufferSize);
+    int valread = read(sock, buffer, bufferSize - 1);
 
     if (!IsSocketOk()) {
       connectionNeeded = true;

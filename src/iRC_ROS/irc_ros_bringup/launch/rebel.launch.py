@@ -175,20 +175,20 @@ def generate_launch_description():
         namespace=namespace,
         parameters=[{"robot_description": robot_description}],
     )
-    joint_state_pub = Node(
-        package="joint_state_publisher",
-        executable="joint_state_publisher",
-        name="joint_state_publisher",
-        namespace=namespace,
-        parameters=[
-            {
-                "source_list": [
-                    "/joint_states",
-                ],
-                "rate": 30,
-            }
-        ],
-    )
+#    joint_state_pub = Node(
+#        package="joint_state_publisher",
+#        executable="joint_state_publisher",
+#        name="joint_state_publisher",
+#        namespace=namespace,
+#        parameters=[
+#            {
+#                "source_list": [
+#                    "/joint_states",
+#                ],
+#                "rate": 30,
+#            }
+#        ],
+#    )
     control_node = Node(
         package="controller_manager",
         executable="ros2_control_node",
@@ -254,7 +254,7 @@ def generate_launch_description():
 
     # Robot nodes
     description.add_action(robot_state_pub)
-    description.add_action(joint_state_pub)
+#    description.add_action(joint_state_pub)
 
     # ROS2 Control nodes
     description.add_action(control_node)

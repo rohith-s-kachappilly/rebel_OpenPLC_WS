@@ -466,7 +466,7 @@ hardware_interface::return_type IrcRosCri::read(const rclcpp::Time &, const rclc
 
   // degrees to radians and apply offset
   for (size_t i = 0; i < pos_.size(); i++) {
-    temp_pos[i] = temp_pos[i] + pos_offset_[i];
+    temp_pos[i] = temp_pos[i] - pos_offset_[i];
     pos_[i] = temp_pos[i] * M_PI / 180.0;
   }
 
