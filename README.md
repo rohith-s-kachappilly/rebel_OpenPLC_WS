@@ -40,6 +40,92 @@ ros2 run rebel_bridge openplc_bridge.py             # OpenPLC bridge
 
 ## Requirements
 
-- Ubuntu 22.04, ROS 2 Humble
-- OpenPLC Runtime V3 (Modbus TCP)
-- `pymodbus==3.6.9` (see `requirements.txt`)
+Everything needed to build and run the OpenPLC → igus ReBeL 4-DOF → Gazebo digital twin
+testbed in `~/rebel_ws`.
+
+---
+
+### Host system
+
+| | |
+|---|---|
+| OS | Ubuntu 22.04 (Jammy) |
+| ROS 2 | Humble Hawksbill |
+| Simulator | Gazebo Classic 11 |
+| Python | 3.10 (Ubuntu default) |
+| Network | Ethernet NIC on the robot subnet, `192.168.3.0/24` |
+
+Gazebo Classic, not Ignition/Gazebo Sim — the twin uses `gazebo_ros2_control` and
+`libgazebo_ros2_control.so`, which are Classic-only.
+
+---
+
+### ROS 2 packages
+
+```bash
+sudo apt update
+sudo apt install -y \
+  ros-humble-ros2-control \
+  ros-humble-ros2-controllers \
+  ros-humble-controller-manager \
+  ros-humble-joint-state-broadcaster \
+  ros-humble-joint-trajectory-controller \
+  ros-humble-position-controllers \
+  ros-humble-gazebo-ros-pkgs \
+  ros-humble-gazebo-ros2-control \
+  ros-humble-xacro \
+  ros-humble-nav2-common \
+  python3-colcon-common-extensions python3-vcstool python3-rosdep
+```
+
+What each is actually for:
+
+- `joint-trajectory-controller` — drives the **real** arm; the bridge publishes to it
+- `position-controllers` — provides `JointGroupPositionController` for the **twin**
+- `gazebo-ros2-control` — the `libgazebo_ros2_control.so` plugin the twin's xacro loads
+- `nav2-common` — `rebel.launch.py` imports `ReplaceString` from it
+
+---
+
+### Python packages
+
+```bash
+pip install "pymodbus==3.6.9" --break-system-packages
+```
+
+**Pin this exact version.** pymodbus 3.7+ changed the datastore and server API; the
+bridge's `ModbusSlaveContext` / `StartTcpServer` usage will not run on it.
+
+---
+
+### OpenPLC Runtime
+
+OpenPLC Runtime V4, running as Modbus TCP **master**. The bridge is the slave.
+
+Required settings:
+
+- **Settings → Enable Modbus Server: OFF.** OpenPLC's own server would clash with the
+  bridge on the port.
+- **Slave Devices → one** Generic Modbus TCP device at `127.0.0.1:1502`.
+  One device, not one per joint.
+
+---
+
+### Robot hardware
+
+| | |
+|---|---|
+| Arm | igus ReBeL 4-DOF, **revision 01** |
+| Interface | CRI over Ethernet |
+| Robot IP | `192.168.3.11` (default, set in `igus_rebel_4dof_00.ros2_control.xacro`) |
+| PC IP | `192.168.3.10/24` |
+
+```bash
+sudo ip addr add 192.168.3.10/24 dev <nic>
+sudo ip link set <nic> up
+ping 192.168.3.11
+```
+
+The launch file defaults `hardware_protocol` to `cprcanv2` (CAN) — **`cri` must be passed
+explicitly** for the Ethernet arm.
+
