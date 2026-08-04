@@ -3,8 +3,8 @@
 <package format="3">
   <name>rebel_bridge</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="tsn_lab@todo.todo">tsn_lab</maintainer>
+  <description>Bridge Node for OpenPLC-ROS Integration</description>
+  <maintainer email="rohith_siju.kachappilly@mailbox.tu-dresden.de">tsn_lab</maintainer>
   <license>TODO: License declaration</license>
 
   <depend>rcply</depend>

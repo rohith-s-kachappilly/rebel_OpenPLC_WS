@@ -14,8 +14,8 @@ setup(
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='tsn_lab',
-    maintainer_email='tsn_lab@todo.todo',
-    description='TODO: Package description',
+    maintainer_email='rohith_siju.kachappilly@mailbox.tu-dresden.de',
+    description='Bridge Node for OpenPLC-ROS Integration',
     license='TODO: License declaration',
     extras_require={
         'test': [
