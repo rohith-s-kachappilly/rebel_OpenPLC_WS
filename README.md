@@ -1,4 +1,4 @@
-# igus_REBEL_4DOF_01 (24V) Integration with OpenPLC
+# IGUS_REBEL_4DOF_01(24V) Integration with OpenPLC
 
 ROS 2 Humble workspace for the igus ReBeL 4-DOF hardware-in-the-loop testbed
 at the Deutsche Telekom Chair of Communication Networks, TU Dresden.
