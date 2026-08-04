@@ -3,6 +3,10 @@
 ROS 2 Humble workspace for the igus ReBeL 4-DOF hardware-in-the-loop testbed
 at the Deutsche Telekom Chair of Communication Networks, TU Dresden.
 
+## System Architecture
+<img width="1800" height="1650" alt="openplc_ros2_rebel_twin_interface_map" src="https://github.com/user-attachments/assets/b0358af9-d98e-47e8-84d7-f151777a97fe" />
+
+
 ## Packages
 
 | Package | Origin | Purpose |
