@@ -1,7 +1,7 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription, RegisterEventHandler
+from launch.actions import IncludeLaunchDescription, RegisterEventHandler,SetEnvironmentVariable
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
@@ -13,9 +13,22 @@ def generate_launch_description():
     xacro_file = os.path.join(pkg, "urdf", "rebel4dof_on_platform.gazebo.urdf.xacro")
     robot_desc = xacro.process_file(xacro_file).toxml()
 
+    world_file = os.path.join(pkg, "worlds", "cyberzoo_panel.world")
+    models_dir = os.path.join(pkg, "models")
+ 
+    # Let Gazebo resolve model:// URIs against the models shipped in this package.
+    # Append, never replace -- ~/.gazebo/models and other packages live in here too.
+    existing_models = os.environ.get("GAZEBO_MODEL_PATH", "")
+    set_model_path = SetEnvironmentVariable(
+        "GAZEBO_MODEL_PATH",
+        f"{existing_models}:{models_dir}" if existing_models else models_dir)
+ 
+    
+
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(
-            get_package_share_directory("gazebo_ros"), "launch", "gazebo.launch.py")))
+            get_package_share_directory("gazebo_ros"), "launch", "gazebo.launch.py")),
+        launch_arguments={"world": world_file}.items())
 
     rsp = Node(
         package="robot_state_publisher", executable="robot_state_publisher",
@@ -33,6 +46,7 @@ def generate_launch_description():
                arguments=["arm_position_controller", "-c", "/sim/controller_manager"])
 
     return LaunchDescription([
+        set_model_path,
         gazebo, rsp, spawn,
         RegisterEventHandler(OnProcessExit(target_action=spawn, on_exit=[jsb])),
         RegisterEventHandler(OnProcessExit(target_action=jsb, on_exit=[arm])),
